@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import { useApp } from '@/lib/store';
 import { api } from '@/lib/api';
 import { ROLE_COLORS } from '@/lib/constants';
@@ -23,6 +24,9 @@ export default function SettingsPage() {
   const [pwError, setPwError] = useState('');
   const [pwSuccess, setPwSuccess] = useState('');
   const [pwSaving, setPwSaving] = useState(false);
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   async function handleChangePassword() {
     setPwError('');
@@ -109,34 +113,64 @@ export default function SettingsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="sm:col-span-2">
             <label className="block text-xs font-semibold text-[#5b6b7b] mb-1">Current Password</label>
-            <input
-              type="password"
-              className="w-full px-3 py-2 rounded-lg border border-[#e0e4ea] text-sm text-[#16222e] focus:outline-none focus:border-[#0a6ed1] transition-colors"
-              value={pwCurrent}
-              onChange={e => setPwCurrent(e.target.value)}
-              autoComplete="current-password"
-            />
+            <div className="relative">
+              <input
+                type={showCurrent ? 'text' : 'password'}
+                className="w-full pl-3 pr-10 py-2 rounded-lg border border-[#e0e4ea] text-sm text-[#16222e] focus:outline-none focus:border-[#0a6ed1] transition-colors"
+                value={pwCurrent}
+                onChange={e => setPwCurrent(e.target.value)}
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrent(v => !v)}
+                className="absolute inset-y-0 right-2 flex items-center text-[#7b8794] hover:text-[#1b2a3d] cursor-pointer"
+                aria-label={showCurrent ? 'Hide password' : 'Show password'}
+              >
+                {showCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
           </div>
           <div>
             <label className="block text-xs font-semibold text-[#5b6b7b] mb-1">New Password</label>
-            <input
-              type="password"
-              className="w-full px-3 py-2 rounded-lg border border-[#e0e4ea] text-sm text-[#16222e] focus:outline-none focus:border-[#0a6ed1] transition-colors"
-              placeholder="Min 6 characters"
-              value={pwNew}
-              onChange={e => setPwNew(e.target.value)}
-              autoComplete="new-password"
-            />
+            <div className="relative">
+              <input
+                type={showNew ? 'text' : 'password'}
+                className="w-full pl-3 pr-10 py-2 rounded-lg border border-[#e0e4ea] text-sm text-[#16222e] focus:outline-none focus:border-[#0a6ed1] transition-colors"
+                placeholder="Min 6 characters"
+                value={pwNew}
+                onChange={e => setPwNew(e.target.value)}
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNew(v => !v)}
+                className="absolute inset-y-0 right-2 flex items-center text-[#7b8794] hover:text-[#1b2a3d] cursor-pointer"
+                aria-label={showNew ? 'Hide password' : 'Show password'}
+              >
+                {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
           </div>
           <div>
             <label className="block text-xs font-semibold text-[#5b6b7b] mb-1">Confirm New Password</label>
-            <input
-              type="password"
-              className="w-full px-3 py-2 rounded-lg border border-[#e0e4ea] text-sm text-[#16222e] focus:outline-none focus:border-[#0a6ed1] transition-colors"
-              value={pwConfirm}
-              onChange={e => setPwConfirm(e.target.value)}
-              autoComplete="new-password"
-            />
+            <div className="relative">
+              <input
+                type={showConfirm ? 'text' : 'password'}
+                className="w-full pl-3 pr-10 py-2 rounded-lg border border-[#e0e4ea] text-sm text-[#16222e] focus:outline-none focus:border-[#0a6ed1] transition-colors"
+                value={pwConfirm}
+                onChange={e => setPwConfirm(e.target.value)}
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm(v => !v)}
+                className="absolute inset-y-0 right-2 flex items-center text-[#7b8794] hover:text-[#1b2a3d] cursor-pointer"
+                aria-label={showConfirm ? 'Hide password' : 'Show password'}
+              >
+                {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
           </div>
         </div>
 
