@@ -1,6 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { useApp } from '@/lib/store';
+import { api } from '@/lib/api';
 import { ROLE_COLORS } from '@/lib/constants';
 import { getInitials } from '@/lib/data';
 import { Card } from '@/components/ui/Card';
@@ -14,6 +16,44 @@ import { Modal } from '@/components/ui/Modal';
 export default function SettingsPage() {
   const { state, set, saveInvite } = useApp();
   const { settings, users, syncing, inviteOpen, inviteError, invite } = state;
+
+  const [pwCurrent, setPwCurrent] = useState('');
+  const [pwNew, setPwNew] = useState('');
+  const [pwConfirm, setPwConfirm] = useState('');
+  const [pwError, setPwError] = useState('');
+  const [pwSuccess, setPwSuccess] = useState('');
+  const [pwSaving, setPwSaving] = useState(false);
+
+  async function handleChangePassword() {
+    setPwError('');
+    setPwSuccess('');
+    if (pwNew.length < 6) {
+      setPwError('New password must be at least 6 characters');
+      return;
+    }
+    if (pwNew !== pwConfirm) {
+      setPwError('New password and confirmation do not match');
+      return;
+    }
+    if (pwNew === pwCurrent) {
+      setPwError('New password must differ from current password');
+      return;
+    }
+    setPwSaving(true);
+    const res = await api.post<{ success: boolean }>('/auth/change-password', {
+      currentPassword: pwCurrent,
+      newPassword: pwNew,
+    });
+    setPwSaving(false);
+    if (res.error) {
+      setPwError(res.error);
+      return;
+    }
+    setPwSuccess('Password updated successfully');
+    setPwCurrent('');
+    setPwNew('');
+    setPwConfirm('');
+  }
 
   function handleSync() {
     set({ syncing: true });
@@ -62,6 +102,62 @@ export default function SettingsPage() {
           </div>
         </div>
       </Card>
+
+      {/* ---- Change Password (admin only) ---- */}
+      {state.currentUser?.role === 'Admin' && <Card>
+        <h2 className="text-[15px] font-bold text-[#1b2a3d] mb-4">Change Password</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-semibold text-[#5b6b7b] mb-1">Current Password</label>
+            <input
+              type="password"
+              className="w-full px-3 py-2 rounded-lg border border-[#e0e4ea] text-sm text-[#16222e] focus:outline-none focus:border-[#0a6ed1] transition-colors"
+              value={pwCurrent}
+              onChange={e => setPwCurrent(e.target.value)}
+              autoComplete="current-password"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-[#5b6b7b] mb-1">New Password</label>
+            <input
+              type="password"
+              className="w-full px-3 py-2 rounded-lg border border-[#e0e4ea] text-sm text-[#16222e] focus:outline-none focus:border-[#0a6ed1] transition-colors"
+              placeholder="Min 6 characters"
+              value={pwNew}
+              onChange={e => setPwNew(e.target.value)}
+              autoComplete="new-password"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-[#5b6b7b] mb-1">Confirm New Password</label>
+            <input
+              type="password"
+              className="w-full px-3 py-2 rounded-lg border border-[#e0e4ea] text-sm text-[#16222e] focus:outline-none focus:border-[#0a6ed1] transition-colors"
+              value={pwConfirm}
+              onChange={e => setPwConfirm(e.target.value)}
+              autoComplete="new-password"
+            />
+          </div>
+        </div>
+
+        {pwError && (
+          <p className="mt-4 text-sm text-[#dc2626] bg-[#fdecec] px-3 py-2 rounded-lg">{pwError}</p>
+        )}
+        {pwSuccess && (
+          <p className="mt-4 text-sm text-[#15803d] bg-[#e7f5ec] px-3 py-2 rounded-lg">{pwSuccess}</p>
+        )}
+
+        <div className="mt-5 pt-4 border-t border-[#e8ecf1]">
+          <button
+            onClick={handleChangePassword}
+            disabled={pwSaving || !pwCurrent || !pwNew || !pwConfirm}
+            className="px-4 py-2 rounded-lg text-sm font-semibold text-white transition-colors cursor-pointer disabled:opacity-60"
+            style={{ backgroundColor: '#0a6ed1' }}
+          >
+            {pwSaving ? 'Saving\u2026' : 'Update Password'}
+          </button>
+        </div>
+      </Card>}
 
       {/* ---- Company ---- */}
       <Card>
