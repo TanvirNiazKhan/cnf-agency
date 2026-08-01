@@ -91,14 +91,13 @@ export class CasesController {
   ) {
     const ext = file.originalname.split('.').pop()?.toLowerCase();
     const type = ext === 'pdf' ? FileType.PDF : FileType.IMG;
-    return this.casesService.addFile(id, stepId, {
-      name: file.originalname,
-      type,
-      category: body.category,
-      fileDate: body.fileDate,
-      fileSize: String(file.size),
-      storageKey: file.filename,
-    }, user);
+    return this.casesService.addFile(
+      id,
+      stepId,
+      file,
+      { category: body.category, fileDate: body.fileDate, type },
+      user,
+    );
   }
 
   @Get(':id/steps/:stepId/files/:fileId/download')
@@ -108,8 +107,12 @@ export class CasesController {
     @Param('fileId') fileId: string,
     @Res() res: Response,
   ) {
-    const { filePath, fileName } = await this.casesService.getFilePath(fileId);
-    res.download(filePath, fileName);
+    const { stream, fileName, contentType, contentLength } =
+      await this.casesService.getFileStream(fileId);
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    if (contentType) res.setHeader('Content-Type', contentType);
+    if (contentLength) res.setHeader('Content-Length', contentLength);
+    stream.pipe(res);
   }
 
   @Delete(':id/steps/:stepId/files/:fileId')

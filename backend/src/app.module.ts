@@ -18,6 +18,7 @@ import { WorkflowModule } from './workflow/workflow.module';
 import { CasesModule } from './cases/cases.module';
 import { AttendanceModule } from './attendance/attendance.module';
 import { SettingsModule } from './settings/settings.module';
+import { StorageModule } from './storage/storage.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { SettingsModule } from './settings/settings.module';
       useFactory: (config: ConfigService) => config.get('database') as object,
       inject: [ConfigService],
     }),
+    StorageModule,
     AuthModule,
     UsersModule,
     ImportersModule,

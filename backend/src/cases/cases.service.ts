@@ -4,8 +4,6 @@ import {
   ConflictException,
   BadRequestException,
 } from '@nestjs/common';
-import { join } from 'path';
-import { unlink } from 'fs/promises';
 import { CasesRepository } from './repositories/cases.repository';
 import { StepDataRepository } from './repositories/step-data.repository';
 import { FileEntryRepository } from './repositories/file-entry.repository';
@@ -14,11 +12,10 @@ import { CreateCaseDto } from './dto/create-case.dto';
 import { UpdateCaseDto } from './dto/update-case.dto';
 import { ListCasesDto } from './dto/list-cases.dto';
 import { CompleteStepDto } from './dto/complete-step.dto';
-import { UploadFileDto } from './dto/upload-file.dto';
 import { User } from '../users/entities/user.entity';
 import { CaseChannel } from './entities/case.entity';
-
-const UPLOADS_DIR = join(__dirname, '..', '..', 'uploads');
+import { FileType } from './entities/file-entry.entity';
+import { StorageService } from '../storage/storage.service';
 
 @Injectable()
 export class CasesService {
@@ -27,6 +24,7 @@ export class CasesService {
     private stepDataRepository: StepDataRepository,
     private fileEntryRepository: FileEntryRepository,
     private workflowStepsRepository: WorkflowStepsRepository,
+    private storageService: StorageService,
   ) {}
 
   async findAll(dto: ListCasesDto) {
@@ -197,39 +195,46 @@ export class CasesService {
     return sd;
   }
 
-  async addFile(caseId: string, stepId: string, dto: UploadFileDto, user: User) {
+  async addFile(
+    caseId: string,
+    stepId: string,
+    file: Express.Multer.File,
+    meta: { category: string; fileDate?: string; type: FileType },
+    user: User,
+  ) {
     let sd = await this.stepDataRepository.findByCaseAndStep(caseId, stepId);
     if (!sd) {
       sd = await this.stepDataRepository.save({ caseId, stepId, checks: {}, fields: {} });
     }
 
+    const uploaded = await this.storageService.upload(file);
+
     return this.fileEntryRepository.save({
       stepDataId: sd.id,
-      name: dto.name,
-      type: dto.type,
-      category: dto.category,
-      fileDate: dto.fileDate ? new Date(dto.fileDate) : new Date(),
-      fileSize: dto.fileSize || null,
-      storageKey: dto.storageKey || null,
+      name: file.originalname,
+      type: meta.type,
+      category: meta.category,
+      fileDate: meta.fileDate ? new Date(meta.fileDate) : new Date(),
+      fileSize: String(uploaded.size),
+      storageKey: uploaded.key,
       uploadedById: user.id,
     });
   }
 
-  async getFilePath(fileId: string) {
+  async getFileStream(fileId: string) {
     const file = await this.fileEntryRepository.findById(fileId);
     if (!file || !file.storageKey) throw new NotFoundException('File not found');
-    return {
-      filePath: join(UPLOADS_DIR, file.storageKey),
-      fileName: file.name,
-    };
+    const { stream, contentType, contentLength } = await this.storageService.download(
+      file.storageKey,
+    );
+    return { stream, fileName: file.name, contentType, contentLength };
   }
 
   async removeFile(caseId: string, stepId: string, fileId: string) {
     const file = await this.fileEntryRepository.findById(fileId);
     if (!file) throw new NotFoundException('File not found');
     if (file.storageKey) {
-      const filePath = join(UPLOADS_DIR, file.storageKey);
-      await unlink(filePath).catch(() => {});
+      await this.storageService.remove(file.storageKey);
     }
     await this.fileEntryRepository.delete(fileId);
     return { message: 'File deleted' };
