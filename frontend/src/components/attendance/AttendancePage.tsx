@@ -315,7 +315,7 @@ function AdminView({ attSettings, set, limit, todayData, todayKey, presentN, onT
                   type="number"
                   step="any"
                   value={attSettings.latitude ?? ''}
-                  placeholder="23.8103"
+                  placeholder="00.00"
                   onChange={e => {
                     const v = e.target.value ? parseFloat(e.target.value) : null;
                     set({ attSettings: { ...attSettings, latitude: v } });
@@ -329,7 +329,7 @@ function AdminView({ attSettings, set, limit, todayData, todayKey, presentN, onT
                   type="number"
                   step="any"
                   value={attSettings.longitude ?? ''}
-                  placeholder="90.4125"
+                  placeholder="00.00"
                   onChange={e => {
                     const v = e.target.value ? parseFloat(e.target.value) : null;
                     set({ attSettings: { ...attSettings, longitude: v } });
