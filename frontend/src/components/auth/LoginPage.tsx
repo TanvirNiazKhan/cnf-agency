@@ -77,10 +77,6 @@ export function LoginPage({ onLogin }: Props) {
             {loading ? 'Signing in\u2026' : 'Sign In'}
           </button>
         </form>
-
-        <p className="mt-6 text-center text-[11.5px] text-[#9aa6b4]">
-          Default: admin@clearport.com / admin123
-        </p>
       </div>
     </div>
   );
