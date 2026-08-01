@@ -95,7 +95,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* ---- Notifications (admin only) ---- */}
-      {state.currentUser?.role === 'admin' && <Card>
+      {state.currentUser?.role === 'Admin' && <Card>
         <h2 className="text-[15px] font-bold text-[#1b2a3d] mb-4">Notifications</h2>
         <div className="space-y-4">
           <Toggle
@@ -142,12 +142,12 @@ export default function SettingsPage() {
       </Card>}
 
       {/* ---- Team Management (admin only) ---- */}
-      {state.currentUser?.role === 'admin' && <Card>
+      {state.currentUser?.role === 'Admin' && <Card>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-[15px] font-bold text-[#1b2a3d]">
             Team Management <span className="text-[#7b8794] font-normal">({users.length})</span>
           </h2>
-          {state.currentUser?.role === 'admin' && (
+          {state.currentUser?.role === 'Admin' && (
             <button
               onClick={() => set({ inviteOpen: true, inviteError: '', invite: { name: '', email: '', role: 'C&F Agent', pass: '', pass2: '' } })}
               className="px-4 py-2 rounded-lg text-sm font-semibold text-white cursor-pointer transition-colors hover:opacity-90"
@@ -216,7 +216,7 @@ export default function SettingsPage() {
       </Card>}
 
       {/* ---- Invite Modal (admin only) ---- */}
-      {state.currentUser?.role === 'admin' &&
+      {state.currentUser?.role === 'Admin' &&
       <Modal
         open={inviteOpen}
         onClose={() => set({ inviteOpen: false, inviteError: '' })}

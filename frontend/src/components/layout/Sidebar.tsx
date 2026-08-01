@@ -46,7 +46,7 @@ export function Sidebar() {
         </div>
 
         <nav className="flex flex-col gap-1 px-3.5">
-          {NAV_ITEMS.filter(item => !item.adminOnly || state.currentUser?.role === 'admin').map((item, i) => {
+          {NAV_ITEMS.filter(item => !item.adminOnly || state.currentUser?.role === 'Admin').map((item, i) => {
             const active = state.view === item.view || (item.view === 'cases' && state.view === 'detail');
             const Icon = item.icon;
             return (

@@ -28,7 +28,7 @@ function dateLabel(key: string) {
 export function AttendancePage() {
   const { state, set } = useApp();
   const { attSettings, attendance, users } = state;
-  const isAdmin = state.currentUser?.role === 'admin';
+  const isAdmin = state.currentUser?.role === 'Admin';
   const attView = isAdmin ? state.attView : 'me';
   const [now, setNow] = useState(Date.now());
 
